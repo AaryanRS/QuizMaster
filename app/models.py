@@ -1,0 +1,72 @@
+from datetime import datetime, timezone
+
+from app import db
+
+
+def utc_now():
+    return datetime.now(timezone.utc)
+
+
+class Quiz(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255), default="")
+    category = db.Column(db.String(50), default="General")
+    difficulty = db.Column(db.String(10), default="easy")
+    created_at = db.Column(db.DateTime, default=utc_now)
+
+    questions = db.relationship("Question", backref="quiz", lazy=True)
+    attempts = db.relationship("Attempt", backref="quiz", lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "category": self.category,
+            "difficulty": self.difficulty,
+            "question_count": len(self.questions),
+            "created_at": self.created_at.isoformat(),
+        }
+
+
+class Question(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz.id"), nullable=False)
+    text = db.Column(db.String(255), nullable=False)
+    option_a = db.Column(db.String(100), nullable=False)
+    option_b = db.Column(db.String(100), nullable=False)
+    option_c = db.Column(db.String(100), nullable=False)
+    option_d = db.Column(db.String(100), nullable=False)
+    correct_option = db.Column(db.String(1), nullable=False)
+
+    def to_dict(self):
+        # The correct answer is not included on purpose
+        return {
+            "id": self.id,
+            "text": self.text,
+            "option_a": self.option_a,
+            "option_b": self.option_b,
+            "option_c": self.option_c,
+            "option_d": self.option_d,
+        }
+
+
+class Attempt(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz.id"), nullable=False)
+    player_name = db.Column(db.String(50), nullable=False)
+    score = db.Column(db.Integer, nullable=False)
+    total_questions = db.Column(db.Integer, nullable=False)
+    time_taken_seconds = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=utc_now)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "player_name": self.player_name,
+            "score": self.score,
+            "total_questions": self.total_questions,
+            "time_taken_seconds": self.time_taken_seconds,
+            "created_at": self.created_at.isoformat(),
+        }

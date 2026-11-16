@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Result{% endblock %}
+
+{% block content %}
+<h1>Your result</h1>
+<p id="message"></p>
+
+<section id="result-box" class="card" hidden>
+    <p id="result-name"></p>
+    <p id="result-score" class="big-score"></p>
+    <p id="result-correct"></p>
+    <p id="result-wrong"></p>
+    <p id="result-time"></p>
+    <div class="buttons">
+        <a id="leaderboard-link" class="button" href="#">View leaderboard</a>
+        <a class="button" href="{{ url_for('pages.index') }}">More quizzes</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/result.js') }}"></script>
+{% endblock %}

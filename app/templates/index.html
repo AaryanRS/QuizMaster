@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Quizzes{% endblock %}
+
+{% block content %}
+<h1>Choose a quiz</h1>
+<p id="message"></p>
+<div id="quiz-list" class="quiz-grid"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}
