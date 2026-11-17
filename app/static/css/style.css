@@ -68,6 +68,11 @@ main {
     margin-right: 8px;
 }
 
+.option:has(input:checked) {
+    background: #ebf4ff;
+    border-color: #2c5282;
+}
+
 button,
 .button {
     display: inline-block;
