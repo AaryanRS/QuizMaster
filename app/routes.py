@@ -1,6 +1,6 @@
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, current_app, jsonify, render_template, request
 
-from app import db
+from app import db, limiter
 from app.models import Attempt, Question, Quiz
 
 api = Blueprint("api", __name__, url_prefix="/api")
@@ -116,6 +116,7 @@ def add_question(quiz_id):
 
 
 @api.route("/quizzes/<int:quiz_id>/submit", methods=["POST"])
+@limiter.limit(lambda: current_app.config["SUBMIT_RATE_LIMIT"])
 def submit_quiz(quiz_id):
     quiz = db.session.get(Quiz, quiz_id)
     if quiz is None:

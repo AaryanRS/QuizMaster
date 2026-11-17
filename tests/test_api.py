@@ -120,6 +120,27 @@ def test_submit_quiz_not_found(client):
     assert response.status_code == 404
 
 
+def test_submit_quiz_rate_limit(client, app):
+    app.config["SUBMIT_RATE_LIMIT"] = "2 per minute"
+    quiz_id = create_quiz(client)
+    add_question(client, quiz_id)
+    question_id = client.get(f"/api/quizzes/{quiz_id}").get_json()["questions"][0]["id"]
+    payload = {
+        "player_name": "Asha",
+        "answers": {str(question_id): "B"},
+    }
+
+    assert client.post(f"/api/quizzes/{quiz_id}/submit", json=payload).status_code == 200
+    assert client.post(f"/api/quizzes/{quiz_id}/submit", json=payload).status_code == 200
+    response = client.post(f"/api/quizzes/{quiz_id}/submit", json=payload)
+
+    assert response.status_code == 429
+    assert response.get_json() == {
+        "error": "Too many submissions. Please try again later."
+    }
+    assert response.headers["Retry-After"].isdigit()
+
+
 def test_leaderboard_is_sorted_and_limited(client):
     quiz_id = create_quiz(client)
     add_question(client, quiz_id, "B")
