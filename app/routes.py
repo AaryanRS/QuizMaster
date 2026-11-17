@@ -42,6 +42,11 @@ def leaderboard_page():
     return render_template("leaderboard.html")
 
 
+@pages.route("/create")
+def create_page():
+    return render_template("create.html")
+
+
 @api.route("/quizzes")
 def list_quizzes():
     query = Quiz.query
