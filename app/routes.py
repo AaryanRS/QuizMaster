@@ -7,7 +7,10 @@ api = Blueprint("api", __name__, url_prefix="/api")
 pages = Blueprint("pages", __name__)
 
 DIFFICULTIES = ["easy", "medium", "hard"]
-OPTIONS = ["A", "B", "C", "D"]
+OPTIONS = {
+    "multiple_choice": ["A", "B", "C", "D"],
+    "true_false": ["A", "B"],
+}
 
 
 def error(message, status):
@@ -86,6 +89,7 @@ def create_quiz():
     return jsonify(quiz.to_dict()), 201
 
 
+
 @api.route("/quizzes/<int:quiz_id>/questions", methods=["POST"])
 def add_question(quiz_id):
     quiz = db.session.get(Quiz, quiz_id)
@@ -94,22 +98,49 @@ def add_question(quiz_id):
 
     data = request.get_json(silent=True) or {}
     text = get_text(data, "text")
-    options = [get_text(data, "option_" + letter) for letter in "abcd"]
+    raw_question_type = data.get("question_type", "multiple_choice")
+
+    if not isinstance(raw_question_type, str):
+        return error("question_type must be a string", 400)
+
+    question_type = raw_question_type.strip()
+
+    if question_type not in OPTIONS:
+        return error(
+            "question_type must be multiple_choice or true_false",
+            400
+        )
+    options = {
+        letter: get_text(data, "option_" + letter.lower())
+        for letter in OPTIONS[question_type]
+    }
+
+    if not text:
+        return error("Question text is required", 400)
+
+    if any(not value for value in options.values()):
+        return error("All options for this question type are required", 400)
+
+    if question_type == "true_false":
+        if get_text(data, "option_c") or get_text(data, "option_d"):
+            return error("True/false questions can only have two options", 400)
+
     correct_option = get_text(data, "correct_option")
-    if not text or "" in options:
-        return error("Question text and all 4 options are required", 400)
-    if correct_option not in OPTIONS:
-        return error("correct_option must be A, B, C or D", 400)
+    if correct_option not in OPTIONS[question_type]:
+        allowed = " or ".join(OPTIONS[question_type])
+        return error(f"correct_option must be {allowed}", 400)
 
     question = Question(
         quiz_id=quiz.id,
         text=text,
-        option_a=options[0],
-        option_b=options[1],
-        option_c=options[2],
-        option_d=options[3],
+        question_type=question_type,
+        option_a=options["A"],
+        option_b=options["B"],
+        option_c=options.get("C"),
+        option_d=options.get("D"),
         correct_option=correct_option,
     )
+
     db.session.add(question)
     db.session.commit()
     return jsonify(question.to_dict()), 201
@@ -134,10 +165,17 @@ def submit_quiz(quiz_id):
     if not isinstance(time_taken, int) or time_taken < 0:
         return error("time_taken_seconds must be a positive number", 400)
 
-    # Answers are keyed by question id; unanswered questions count as wrong
+       # Answers are keyed by question id; unanswered questions count as wrong.
+    # Only valid options for each question type can receive credit.
     score = 0
     for question in quiz.questions:
-        if answers.get(str(question.id)) == question.correct_option:
+        submitted_answer = answers.get(str(question.id))
+        valid_options = OPTIONS.get(question.question_type, [])
+
+        if (
+            submitted_answer in valid_options
+            and submitted_answer == question.correct_option
+        ):
             score += 1
     total = len(quiz.questions)
 

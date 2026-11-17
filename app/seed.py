@@ -1,7 +1,8 @@
 from app import db
 from app.models import Question, Quiz
 
-# Each question: text, option A, B, C, D, correct option
+# Multiple-choice: text, option A, B, C, D, correct option
+# True/false: text, option A, option B, correct option
 SAMPLE_QUIZZES = [
     {
         "title": "Python Basics",
@@ -86,6 +87,13 @@ SAMPLE_QUIZZES = [
              "Volt", "Watt", "Ohm", "Ampere", "D"),
             ("Which part of the cell contains the DNA?",
              "Nucleus", "Membrane", "Cytoplasm", "Ribosome", "A"),
+           {
+                "type": "true_false",
+                "text": "The Earth revolves around the Sun.",
+                "option_a": "True",
+                "option_b": "False",
+                "correct_option": "A",
+            },
         ],
     },
 ]
@@ -103,13 +111,25 @@ def seed_data():
             difficulty=quiz_data["difficulty"],
         )
         db.session.add(quiz)
-        for text, a, b, c, d, correct in quiz_data["questions"]:
-            quiz.questions.append(Question(
-                text=text,
-                option_a=a,
-                option_b=b,
-                option_c=c,
-                option_d=d,
-                correct_option=correct,
-            ))
-    db.session.commit()
+        for question_data in quiz_data["questions"]:
+            if isinstance(question_data, dict):
+                quiz.questions.append(Question(
+                    text=question_data["text"],
+                    question_type=question_data["type"],
+                    option_a=question_data["option_a"],
+                    option_b=question_data["option_b"],
+                    option_c=None,
+                    option_d=None,
+                    correct_option=question_data["correct_option"],
+                ))
+            else:
+                text, a, b, c, d, correct = question_data
+                quiz.questions.append(Question(
+                    text=text,
+                    question_type="multiple_choice",
+                    option_a=a,
+                    option_b=b,
+                    option_c=c,
+                    option_d=d,
+                    correct_option=correct,
+                ))
