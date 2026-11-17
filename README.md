@@ -29,33 +29,34 @@ improvements waiting to be done as issues.
 
 1. Install Python from https://www.python.org/downloads/ and tick
    "Add Python to PATH" during the install.
-2. Clone the repo:
+2. Fork the repository at https://github.com/niat-web/QuizMaster (see [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines).
+3. Clone your fork:
 
    ```
-   git clone https://github.com/NxtLabTech/QuizMaster.git
+   git clone https://github.com/<your-username>/QuizMaster.git
    cd QuizMaster
    ```
 
-3. Create and activate a virtual environment:
+4. Create and activate a virtual environment:
 
    ```
    python -m venv venv
    venv\Scripts\activate
    ```
 
-4. Install the packages:
+5. Install the packages:
 
    ```
    pip install -r requirements.txt
    ```
 
-5. Start the app:
+6. Start the app:
 
    ```
    python run.py
    ```
 
-6. Open http://127.0.0.1:5000 in your browser.
+7. Open http://127.0.0.1:5000 in your browser.
 
 The database file is created automatically on the first run, and 3 sample
 quizzes are added.
