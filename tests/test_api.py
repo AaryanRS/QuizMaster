@@ -126,6 +126,23 @@ def test_submit_quiz_scores_answers(client):
     assert result["time_taken_seconds"] == 12
 
 
+def test_submit_quiz_rejects_boolean_time_taken(client):
+    quiz_id = create_quiz(client)
+    add_question(client, quiz_id, "B")
+    question_id = client.get(f"/api/quizzes/{quiz_id}").get_json()["questions"][0]["id"]
+
+    for bool_value in [True, False]:
+        response = client.post(f"/api/quizzes/{quiz_id}/submit", json={
+            "player_name": "Asha",
+            "answers": {str(question_id): "B"},
+            "time_taken_seconds": bool_value,
+        })
+        assert response.status_code == 400
+        assert response.get_json() == {
+            "error": "time_taken_seconds must be a positive number"
+        }
+
+
 def test_submit_quiz_missing_player_name(client):
     quiz_id = create_quiz(client)
     add_question(client, quiz_id)
