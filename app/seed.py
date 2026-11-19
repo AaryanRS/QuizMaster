@@ -133,3 +133,4 @@ def seed_data():
                     option_d=d,
                     correct_option=correct,
                 ))
+    db.session.commit()
