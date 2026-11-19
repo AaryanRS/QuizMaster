@@ -23,6 +23,9 @@ async function loadQuiz() {
     quiz = await response.json();
     document.getElementById("quiz-title").textContent = quiz.title;
     document.getElementById("quiz-description").textContent = quiz.description;
+    document.getElementById("quiz-category").textContent = quiz.category;
+    document.getElementById("quiz-difficulty").textContent = quiz.difficulty;
+    document.getElementById("quiz-question-count").textContent = quiz.question_count;
     if (quiz.questions.length === 0) {
         message.textContent = "This quiz has no questions yet.";
         return;
