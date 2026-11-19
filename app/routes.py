@@ -48,6 +48,11 @@ def not_found(e):
     return render_template("404.html"), 404
 
 
+@pages.route("/create")
+def create_page():
+    return render_template("create.html")
+
+
 @api.route("/quizzes")
 def list_quizzes():
     query = Quiz.query
