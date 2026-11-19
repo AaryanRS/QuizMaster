@@ -86,6 +86,10 @@ def create_quiz():
     if difficulty not in DIFFICULTIES:
         return error("Difficulty must be easy, medium or hard", 400)
 
+    existing_quiz = Quiz.query.filter(db.func.lower(Quiz.title) == title.lower()).first()
+    if existing_quiz:
+        return error("A quiz with this title already exists", 400)
+
     quiz = Quiz(
         title=title,
         description=get_text(data, "description"),
