@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any
 
 from app import db
 
@@ -19,13 +18,6 @@ class Quiz(db.Model):
     questions = db.relationship("Question", backref="quiz", lazy=True)
     attempts = db.relationship("Attempt", backref="quiz", lazy=True)
 
-    if TYPE_CHECKING:
-        questions: Any
-        attempts: Any
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     def to_dict(self):
         return {
             "id": self.id,
@@ -34,7 +26,7 @@ class Quiz(db.Model):
             "category": self.category,
             "difficulty": self.difficulty,
             "question_count": len(self.questions),
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "created_at": self.created_at.isoformat(),
         }
 
 
@@ -47,9 +39,6 @@ class Question(db.Model):
     option_c = db.Column(db.String(100), nullable=False)
     option_d = db.Column(db.String(100), nullable=False)
     correct_option = db.Column(db.String(1), nullable=False)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def to_dict(self):
         # The correct answer is not included on purpose
@@ -72,12 +61,6 @@ class Attempt(db.Model):
     time_taken_seconds = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=utc_now)
 
-    if TYPE_CHECKING:
-        quiz: Any
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     def to_dict(self):
         return {
             "id": self.id,
@@ -87,5 +70,5 @@ class Attempt(db.Model):
             "score": self.score,
             "total_questions": self.total_questions,
             "time_taken_seconds": self.time_taken_seconds,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "created_at": self.created_at.isoformat(),
         }

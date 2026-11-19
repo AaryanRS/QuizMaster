@@ -200,8 +200,9 @@ def stats():
     })
 
 
-def _get_player_attempts(name):
-    name = (name or "").strip()
+@api.route("/players/<player_name>/attempts")
+def player_attempts(player_name):
+    name = (player_name or "").strip()
     if not name:
         return error("Player name is required", 400)
     attempts = (
@@ -212,27 +213,5 @@ def _get_player_attempts(name):
         .all()
     )
     return jsonify([attempt.to_dict() for attempt in attempts])
-
-
-@api.route("/players/<player_name>/attempts")
-def player_attempts(player_name):
-    return _get_player_attempts(player_name)
-
-
-@api.route("/players/attempts")
-def player_attempts_empty():
-    return error("Player name is required", 400)
-
-
-@api.route("/attempts")
-def attempts_by_query():
-    name = request.args.get("player_name", "")
-    return _get_player_attempts(name)
-
-
-@api.route("/history")
-def history_by_query():
-    name = request.args.get("player_name", "")
-    return _get_player_attempts(name)
 
 

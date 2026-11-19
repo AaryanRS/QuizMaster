@@ -155,17 +155,9 @@ def test_stats(client):
 
 
 def test_player_attempts_empty_name(client):
-    response = client.get("/api/players/attempts")
-    assert response.status_code == 400
-    assert response.get_json()["error"] == "Player name is required"
-
     response_spaces = client.get("/api/players/%20%20/attempts")
     assert response_spaces.status_code == 400
     assert response_spaces.get_json()["error"] == "Player name is required"
-
-    response_query = client.get("/api/attempts?player_name=")
-    assert response_query.status_code == 400
-    assert response_query.get_json()["error"] == "Player name is required"
 
 
 def test_player_attempts_unknown_player(client):
@@ -287,22 +279,6 @@ def test_player_attempts_isolation(client):
     eve_attempts = client.get("/api/players/Eve/attempts").get_json()
     assert len(eve_attempts) == 1
     assert eve_attempts[0]["player_name"] == "Eve"
-
-
-def test_player_attempts_query_param_support(client):
-    quiz_id = create_quiz(client)
-    add_question(client, quiz_id)
-    q_id = client.get(f"/api/quizzes/{quiz_id}").get_json()["questions"][0]["id"]
-    client.post(f"/api/quizzes/{quiz_id}/submit", json={
-        "player_name": "Grace",
-        "answers": {str(q_id): "B"},
-    })
-
-    res1 = client.get("/api/attempts?player_name=Grace").get_json()
-    res2 = client.get("/api/history?player_name=Grace").get_json()
-    res3 = client.get("/api/players/Grace/attempts").get_json()
-    assert len(res1) == 1
-    assert res1 == res2 == res3
 
 
 def test_history_page_rendered(client):
