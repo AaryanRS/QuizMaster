@@ -41,6 +41,12 @@ def result_page():
 def leaderboard_page():
     return render_template("leaderboard.html")
 
+@pages.app_errorhandler(404)
+def not_found(e):
+    if request.path.startswith("/api/"):
+        return error("Not found", 404)
+    return render_template("404.html"), 404
+
 
 @api.route("/quizzes")
 def list_quizzes():
