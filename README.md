@@ -87,9 +87,6 @@ You can configure optional environment variables by creating a .env file based o
 
 FLASK_DEBUG: Set to 1 or true to enable Flask debug mode during development. It is turned off (0) by default.
 
-Running tests
-pytest
-The tests use an in-memory SQLite database, so your real data is not touched.
 
 ## API endpoints
 
