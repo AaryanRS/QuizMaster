@@ -154,4 +154,4 @@ MIT. See the [LICENSE](LICENSE) file.
 
 ![Result page](docs/screenshots/result.jpg)
 
-![Leaderboard](docs/screenshots/leaderboard.jpg)s
+![Leaderboard](docs/screenshots/leaderboard.jpg)
