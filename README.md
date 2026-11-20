@@ -108,6 +108,17 @@ Example body for submitting answers (keys are question ids):
 
 Errors look like `{"error": "Quiz not found"}`.
 
+### Submit rate limiting
+
+`POST /api/quizzes/<id>/submit` is limited to 10 requests per minute per
+client IP address. When the limit is exceeded, the API returns HTTP 429 with a
+JSON error and a `Retry-After` header. The limit can be changed without
+editing the route by setting `SUBMIT_RATE_LIMIT`, for example:
+
+```
+SUBMIT_RATE_LIMIT=20 per minute
+```
+
 ## Troubleshooting
 
 **Port 5000 is already in use**
@@ -134,3 +145,13 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) before you start.
 ## License
 
 MIT. See the [LICENSE](LICENSE) file.
+
+## Screenshots
+
+![Home page](docs/screenshots/home.jpg)
+
+![Quiz page](docs/screenshots/quiz.jpg)
+
+![Result page](docs/screenshots/result.jpg)
+
+![Leaderboard](docs/screenshots/leaderboard.jpg)s
