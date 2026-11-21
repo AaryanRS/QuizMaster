@@ -274,6 +274,23 @@ def test_submit_quiz_missing_player_name(client):
     response = client.post(f"/api/quizzes/{quiz_id}/submit", json={"answers": {}})
     assert response.status_code == 400
 
+def test_submit_quiz_rejects_31_char_name(client):
+    quiz_id = create_quiz(client)
+    add_question(client, quiz_id)
+    response = client.post(f"/api/quizzes/{quiz_id}/submit", json={
+        "player_name": "a" * 31,
+        "answers": {}
+    })
+    assert response.status_code == 400
+
+def test_submit_quiz_accepts_30_char_name(client):
+    quiz_id = create_quiz(client)
+    add_question(client, quiz_id)
+    response = client.post(f"/api/quizzes/{quiz_id}/submit", json={
+        "player_name": "a" * 30,
+        "answers": {}
+    })
+    assert response.status_code == 200
 
 def test_submit_quiz_not_found(client):
     response = client.post("/api/quizzes/999/submit", json={
