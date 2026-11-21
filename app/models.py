@@ -15,8 +15,12 @@ class Quiz(db.Model):
     difficulty = db.Column(db.String(10), default="easy")
     created_at = db.Column(db.DateTime, default=utc_now)
 
-    questions = db.relationship("Question", backref="quiz", lazy=True)
-    attempts = db.relationship("Attempt", backref="quiz", lazy=True)
+    questions = db.relationship(
+        "Question", backref="quiz", lazy=True, cascade="all, delete-orphan"
+    )
+    attempts = db.relationship(
+        "Attempt", backref="quiz", lazy=True, cascade="all, delete-orphan"
+    )
 
     def to_dict(self, question_count=None):
         return {
