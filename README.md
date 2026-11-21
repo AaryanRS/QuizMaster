@@ -148,3 +148,13 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) before you start.
 ## License
 
 MIT. See the [LICENSE](LICENSE) file.
+
+## Screenshots
+
+![Home page](docs/screenshots/home.jpg)
+
+![Quiz page](docs/screenshots/quiz.jpg)
+
+![Result page](docs/screenshots/result.jpg)
+
+![Leaderboard](docs/screenshots/leaderboard.jpg)
