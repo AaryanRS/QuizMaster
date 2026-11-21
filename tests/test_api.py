@@ -16,6 +16,14 @@ def add_question(client, quiz_id, correct_option="B"):
         "option_d": "4",
         "correct_option": correct_option,
     })
+def add_true_false_question(client, quiz_id, correct_option="A"):
+    return client.post(f"/api/quizzes/{quiz_id}/questions", json={
+        "text": "The Earth revolves around the Sun.",
+        "question_type": "true_false",
+        "option_a": "True",
+        "option_b": "False",
+        "correct_option": correct_option,
+    })
 
 
 def test_list_quizzes_empty(client):
@@ -98,9 +106,89 @@ def test_add_question(client):
     assert response.get_json()["text"] == "What is 1 + 1?"
 
 
+def test_add_true_false_question(client):
+    quiz_id = create_quiz(client)
+    response = add_true_false_question(client, quiz_id)
+
+    assert response.status_code == 201
+
+    question = response.get_json()
+    assert question["question_type"] == "true_false"
+    assert question["option_a"] == "True"
+    assert question["option_b"] == "False"
+    assert "option_c" not in question
+    assert "option_d" not in question
+    assert "correct_option" not in question
+
+
 def test_add_question_wrong_option_letter(client):
     quiz_id = create_quiz(client)
     response = add_question(client, quiz_id, correct_option="E")
+    assert response.status_code == 400
+
+
+def test_add_question_invalid_type(client):
+    quiz_id = create_quiz(client)
+
+    response = client.post(f"/api/quizzes/{quiz_id}/questions", json={
+        "text": "Test question",
+        "question_type": "essay",
+        "option_a": "A",
+        "option_b": "B",
+        "correct_option": "A",
+    })
+
+    assert response.status_code == 400
+
+
+def test_add_true_false_question_missing_option(client):
+    quiz_id = create_quiz(client)
+
+    response = client.post(f"/api/quizzes/{quiz_id}/questions", json={
+        "text": "The Earth revolves around the Sun.",
+        "question_type": "true_false",
+        "option_a": "True",
+        "correct_option": "A",
+    })
+
+    assert response.status_code == 400
+
+
+def test_add_true_false_question_invalid_correct_option(client):
+    quiz_id = create_quiz(client)
+    response = add_true_false_question(
+        client, quiz_id, correct_option="C"
+    )
+
+    assert response.status_code == 400
+
+
+def test_add_true_false_question_rejects_extra_options(client):
+    quiz_id = create_quiz(client)
+
+    response = client.post(f"/api/quizzes/{quiz_id}/questions", json={
+        "text": "The Earth revolves around the Sun.",
+        "question_type": "true_false",
+        "option_a": "True",
+        "option_b": "False",
+        "option_c": "Maybe",
+        "correct_option": "A",
+    })
+
+    assert response.status_code == 400
+
+def test_add_multiple_choice_question_missing_option(client):
+    quiz_id = create_quiz(client)
+
+    response = client.post(f"/api/quizzes/{quiz_id}/questions", json={
+        "text": "What is 1 + 1?",
+        "question_type": "multiple_choice",
+        "option_a": "1",
+        "option_b": "2",
+        "option_c": "3",
+        "correct_option": "B",
+    })
+
     assert response.status_code == 400
 
 
@@ -124,6 +212,60 @@ def test_submit_quiz_scores_answers(client):
     assert result["score"] == 1
     assert result["wrong"] == 0
     assert result["time_taken_seconds"] == 12
+
+def test_submit_quiz_scores_mixed_question_types(client):
+    quiz_id = create_quiz(client)
+
+    add_question(client, quiz_id, correct_option="B")
+    add_true_false_question(client, quiz_id, correct_option="A")
+
+    questions = client.get(
+        f"/api/quizzes/{quiz_id}"
+    ).get_json()["questions"]
+
+    answers = {
+        str(questions[0]["id"]): "B",
+        str(questions[1]["id"]): "A",
+    }
+
+    response = client.post(f"/api/quizzes/{quiz_id}/submit", json={
+        "player_name": "Asha",
+        "answers": answers,
+        "time_taken_seconds": 20,
+    })
+
+    assert response.status_code == 200
+
+    result = response.get_json()
+    assert result["score"] == 2
+    assert result["wrong"] == 0
+
+
+def test_submit_quiz_scores_incorrect_mixed_answers(client):
+    quiz_id = create_quiz(client)
+
+    add_question(client, quiz_id, correct_option="B")
+    add_true_false_question(client, quiz_id, correct_option="A")
+
+    questions = client.get(
+        f"/api/quizzes/{quiz_id}"
+    ).get_json()["questions"]
+
+    answers = {
+        str(questions[0]["id"]): "A",
+        str(questions[1]["id"]): "B",
+    }
+
+    response = client.post(f"/api/quizzes/{quiz_id}/submit", json={
+        "player_name": "Asha",
+        "answers": answers,
+    })
+
+    assert response.status_code == 200
+
+    result = response.get_json()
+    assert result["score"] == 0
+    assert result["wrong"] == 2
 
 
 def test_submit_quiz_missing_player_name(client):
