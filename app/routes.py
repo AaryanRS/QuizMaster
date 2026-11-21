@@ -56,6 +56,11 @@ def create_page():
     return render_template("create.html")
 
 
+@pages.route("/history")
+def history_page():
+    return render_template("history.html")
+
+
 @api.route("/quizzes")
 def list_quizzes():
     query = Quiz.query
@@ -247,3 +252,20 @@ def stats():
         "total_attempts": Attempt.query.count(),
         "quizzes": quiz_stats,
     })
+
+
+@api.route("/players/<player_name>/attempts")
+def player_attempts(player_name):
+    name = (player_name or "").strip()
+    if not name:
+        return error("Player name is required", 400)
+    attempts = (
+        Attempt.query.filter(
+            db.func.lower(Attempt.player_name) == name.lower()
+        )
+        .order_by(Attempt.created_at.desc(), Attempt.id.desc())
+        .all()
+    )
+    return jsonify([attempt.to_dict() for attempt in attempts])
+
+

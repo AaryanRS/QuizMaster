@@ -78,6 +78,8 @@ class Attempt(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "quiz_id": self.quiz_id,
+            "quiz_title": self.quiz.title if self.quiz else "",
             "player_name": self.player_name,
             "score": self.score,
             "total_questions": self.total_questions,
