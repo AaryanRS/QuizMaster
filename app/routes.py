@@ -185,7 +185,7 @@ def submit_quiz(quiz_id):
         return error("Player name cannot exceed 30 characters", 400)
     if not isinstance(answers, dict):
         return error("Answers must be an object like {\"1\": \"A\"}", 400)
-    if not isinstance(time_taken, int) or time_taken < 0:
+    if isinstance(time_taken, bool) or not isinstance(time_taken, int) or time_taken < 0:
         return error("time_taken_seconds must be a positive number", 400)
 
        # Answers are keyed by question id; unanswered questions count as wrong.
